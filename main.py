@@ -105,28 +105,28 @@ async def generate_text_for_lang(k2, sys, text, tgt):
 
     # Take last N history messages (optional)
     recent_history = history_context[-5:] if history_context else []
-    print("***LANG: ", k2)
-    print("***recent_history: ", recent_history)
+    print("***LANG: ", k2, flush=True)
+    print("***recent_history: ", recent_history, flush=True)
 
     # Build cache key
     cache_key = make_cache_key(text, tgt, recent_history)
     cache_key2 = make_cache_key(text, tgt)
-    print("### Cache Key:", cache_key)
-    print("### Cache Key2:", cache_key2)
+    print("### Cache Key:", cache_key, flush=True)
+    print("### Cache Key2:", cache_key2, flush=True)
 
     # Check cache
     cached = get_cached_translation(cache_key)
     cached2 = get_cached_translation(cache_key2)
     if cached:
-        print("**### cache used!")
+        print("**### cache used!", flush=True)
         return cached
     if cached2:
-        print("**### cache used!")
+        print("**### cache used!", flush=True)
         return cached2
 
     # Build prompt
     prompt = [{"role": "system", "content": sys}] + recent_history + [{"role": "user", "content": text}]
-    print("### prompt:", prompt)
+    print("### prompt:", prompt, flush=True)
 
     response = client.chat.completions.create(
         model="deepseek-chat",
@@ -134,7 +134,7 @@ async def generate_text_for_lang(k2, sys, text, tgt):
         stream=False
     )
 
-    print("**### API used!")
+    print("**### API used!", flush=True)
     translated_text = response.choices[0].message.content
 
     # Update History (maintain max 6 items)
@@ -142,7 +142,7 @@ async def generate_text_for_lang(k2, sys, text, tgt):
     history_context.append({"role": "assistant", "content": translated_text})
     if len(history_context) > 5:
         history_context[:] = history_context[-5:]
-    print("***NEW history: ", history_context)
+    print("***NEW history: ", history_context, flush=True)
 
     # Store in Cache
     add_translation_to_cache(cache_key, translated_text)
@@ -159,14 +159,14 @@ async def gpt_translate(k2, config, text_input):
             system_instruction = config.get("system_instruction", "Translate this text.")
             target_language = config.get("target_language", "English")
         else:
-            print("error: wrong config")
+            print("error: wrong config", flush=True)
 
         transcript_text = await generate_text_for_lang(k2, system_instruction, text_input, target_language)
 
         return transcript_text
 
     except Exception as e:
-        print(f"Error in gpt_translate: {e}")
+        print(f"Error in gpt_translate: {e}", flush=True)
         raise
 
 async def tts (text, config):
@@ -211,7 +211,7 @@ async def tts (text, config):
         return audio_samples, sample_rate
 
     except Exception as e:
-        print(f"[edge_tts_to_float_audio] Error: {e}")
+        print(f"[edge_tts_to_float_audio] Error: {e}", flush=True)
         raise
 
 def get_client_key(tgt_lang, speaker_id):
@@ -258,7 +258,7 @@ async def lifespan(app: FastAPI):
 
     print("Starting up ...")
     yield
-    print("Shutting down. Closing all WebSocket connections...")
+    print("Shutting down. Closing all WebSocket connections...", flush=True)
     websockets = list(rooms[DEFAULT_ROOM].keys())
 
     for ws in websockets:
@@ -283,10 +283,10 @@ async def translate(src_lang, tgt_lang, text, speaker_id):
     try:
         audio, sample_rate, translated_text = await t2S_translate(text, tgt_lang, speaker_id)
         if len(audio) == 0:
-            print("WARNING: Empty audio received!")
+            print("WARNING: Empty audio received!", flush=True)
             return translated_text, ""
 
-        print(f"Final audio for WAV - shape: {audio.shape}, min/max: {audio.min()}/{audio.max()}")
+        print(f"Final audio for WAV - shape: {audio.shape}, min/max: {audio.min()}/{audio.max()}", flush=True)
 
         # Convert float32 normalized audio (-1.0 to 1.0) back to int16 PCM
         int16_audio = (audio * 32767).astype(np.int16)
@@ -304,11 +304,11 @@ async def translate(src_lang, tgt_lang, text, speaker_id):
         buffer.seek(0)
         audio_b64 = base64.b64encode(buffer.read()).decode('utf-8')
 
-        print(f"Base64 audio length: {len(audio_b64)} chars")
+        print(f"Base64 audio length: {len(audio_b64)} chars", flush=True)
         return translated_text, audio_b64
 
     except Exception as e:
-        print(f"Error in translate function: {e}")
+        print(f"Error in translate function: {e}", flush=True)
         return f"Translation error: {str(e)}", ""
 
 
@@ -325,9 +325,9 @@ async def group_translate(connections, src_lang: str, tgt_lang: str, text: str, 
               "src_lang": src_lang,
               "tgt_lang": tgt_lang,
             })
-            print(f"WebSocket x recieved src_lang: {src_lang}, tgt_lang: {tgt_lang}")
+            print(f"WebSocket x recieved src_lang: {src_lang}, tgt_lang: {tgt_lang}", flush=True)
         except Exception as e:
-          print(f"Error translating for group {tgt_lang}/{speaker_id}: {e}")
+          print(f"Error translating for group {tgt_lang}/{speaker_id}: {e}", flush=True)
 
 async def just_send(ws: WebSocket, src_lang: str, text: str):
 
@@ -337,9 +337,9 @@ async def just_send(ws: WebSocket, src_lang: str, text: str):
             "transcript": text,
             "src_lang": src_lang
         })
-        print(f"WebSocket x recieved src_lang: {src_lang}")
+        print(f"WebSocket x recieved src_lang: {src_lang}", flush=True)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error: {e}", flush=True)
 
 async def per_record(connections, per: bool):
     for ws in connections:
@@ -348,9 +348,9 @@ async def per_record(connections, per: bool):
                 "type" : "per_record",
                 "per_record": per,
             })
-            print(f"per_record: {per}")
+            print(f"per_record: {per}", flush=True)
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error: {e}", flush=True)
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -389,7 +389,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     rooms[DEFAULT_ROOM][websocket]["lang"] = lang
                     rooms[DEFAULT_ROOM][websocket]["speaker_id"] = speaker_id
                     await websocket.send_json({"status": "settings_updated"})
-                    print(f"WebSocket {websocket} updated settings: lang={lang}, speaker_id={speaker_id}")
+                    print(f"WebSocket {websocket} updated settings: lang={lang}, speaker_id={speaker_id}", flush=True)
 
                 elif data.get("type") == "ping":
                     await websocket.send_json({"type": "pong"})
@@ -399,7 +399,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     src_lang = data.get("src_lang")
                     text = data.get("text")
                     speaker_id = int(data.get("speaker_id", "0"))
-                    print(f"ws x , src_lang: {src_lang} *type speak")
+                    print(f"ws x , src_lang: {src_lang} *type speak", flush=True)
                     if not src_lang or not text:
                         continue
 
@@ -431,15 +431,15 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
             except Exception as e:
-                print(f"Client error: {e}")
+                print(f"Client error: {e}", flush=True)
                 break
 
             if time.time() - last_active > PING_TIMEOUT:
-                print("Client inactive, disconnecting.")
+                print("Client inactive, disconnecting.", flush=True)
                 break
 
     except Exception as e:
-        print(f"Connection error: {e}")
+        print(f"Connection error: {e}", flush=True)
 
     finally:
         rooms[DEFAULT_ROOM].pop(websocket, None)
@@ -453,7 +453,7 @@ async def websocket_endpoint(websocket: WebSocket):
         try:
             await websocket.close()
         except Exception as e:
-            print(f"Error closing WebSocket: {e}")
+            print(f"Error closing WebSocket: {e}", flush=True)
 
     # finally:
     #     rooms[DEFAULT_ROOM].pop(websocket, None)
