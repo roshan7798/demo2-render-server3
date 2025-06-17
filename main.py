@@ -119,7 +119,7 @@ async def generate_text_for_lang(k2, sys, text, tgt):
         return cached
 
     # Build prompt
-    prompt = [{"role": "system", "content": sys}] + recent_history + [{"role": "user", "content": text}]
+    prompt = {"messages": [{"role": "system", "content": sys}] + recent_history + [{"role": "user", "content": text}]}
     print("### prompt:", prompt, flush=True)
 
     response = client.chat.completions.create(
