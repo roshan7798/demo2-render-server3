@@ -105,28 +105,22 @@ async def generate_text_for_lang(k2, sys, text, tgt):
 
     # Take last N history messages (optional)
     recent_history = history_context[-5:] if history_context else []
-    print("***LANG: ", k2, flush=True)
-    print("***recent_history: ", recent_history, flush=True)
+    print("***LANG: ", k2)
+    print("***recent_history: ", recent_history)
 
     # Build cache key
     cache_key = make_cache_key(text, tgt, recent_history)
-    cache_key2 = make_cache_key(text, tgt)
-    print("### Cache Key:", cache_key, flush=True)
-    print("### Cache Key2:", cache_key2, flush=True)
+    print("### Cache Key:", cache_key)
 
     # Check cache
     cached = get_cached_translation(cache_key)
-    cached2 = get_cached_translation(cache_key2)
     if cached:
-        print("**### cache used!", flush=True)
+        print("**### cache used!")
         return cached
-    if cached2:
-        print("**### cache used!", flush=True)
-        return cached2
 
     # Build prompt
     prompt = [{"role": "system", "content": sys}] + recent_history + [{"role": "user", "content": text}]
-    print("### prompt:", prompt, flush=True)
+    print("### prompt:", prompt)
 
     response = client.chat.completions.create(
         model="deepseek-chat",
@@ -134,15 +128,14 @@ async def generate_text_for_lang(k2, sys, text, tgt):
         stream=False
     )
 
-    print("**### API used!", flush=True)
+    print("**### API used!")
     translated_text = response.choices[0].message.content
-
     # Update History (maintain max 6 items)
     history_context.append({"role": "user", "content": text})
     history_context.append({"role": "assistant", "content": translated_text})
     if len(history_context) > 5:
         history_context[:] = history_context[-5:]
-    print("***NEW history: ", history_context, flush=True)
+    print("***NEW history: ", history_context)
 
     # Store in Cache
     add_translation_to_cache(cache_key, translated_text)
