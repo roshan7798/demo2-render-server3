@@ -110,19 +110,13 @@ async def generate_text_for_lang(k2, sys, text, tgt):
 
     # Build cache key
     cache_key = make_cache_key(text, tgt, recent_history)
-    cache_key2 = make_cache_key(text, tgt)
     print("### Cache Key:", cache_key, flush=True)
-    print("### Cache Key2:", cache_key2, flush=True)
 
     # Check cache
     cached = get_cached_translation(cache_key)
-    cached2 = get_cached_translation(cache_key2)
     if cached:
         print("**### cache used!", flush=True)
         return cached
-    if cached2:
-        print("**### cache used!", flush=True)
-        return cached2
 
     # Build prompt
     prompt = [{"role": "system", "content": sys}] + recent_history + [{"role": "user", "content": text}]
@@ -175,7 +169,7 @@ async def tts (text, config):
             target_language = config.get("target_language", "English")
             voice_name = config.get("voice_name", "en-US-JennyNeural")
         else:
-            print("error: wrong config")
+            print("error: wrong config", flush=True)
         target_sample_rate = 16000
         communicate = edge_tts.Communicate(text=text, voice=voice_name)
         mp3_chunks = []
@@ -256,7 +250,7 @@ async def lifespan(app: FastAPI):
     configs = build_configs()
     clients, histories = build_clients()
 
-    print("Starting up ...")
+    print("Starting up ...", flush=True)
     yield
     print("Shutting down. Closing all WebSocket connections...", flush=True)
     websockets = list(rooms[DEFAULT_ROOM].keys())
@@ -265,11 +259,11 @@ async def lifespan(app: FastAPI):
         try:
             await ws.close(code=1001)  # 1001 = Going Away
         except Exception as e:
-            print(f"WebSocket Disconnected! {e} ")
+            print(f"WebSocket Disconnected! {e} ", flush=True)
         finally:
             rooms[DEFAULT_ROOM].pop(ws, None)
 
-    print("Shutdown complete.")
+    print("Shutdown complete.", flush=True)
 
 app = FastAPI(lifespan=lifespan)
 
