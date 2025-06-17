@@ -110,7 +110,7 @@ async def generate_text_for_lang(k2, sys, text, tgt):
 
     # Build cache key
     cache_key = make_cache_key(text, tgt, recent_history)
-    cache_key2 = make_cache_key(text, tgt, last_history)
+    cache_key2 = make_cache_key(text, tgt)
     print("### Cache Key:", cache_key)
     print("### Cache Key2:", cache_key2)
 
@@ -136,7 +136,6 @@ async def generate_text_for_lang(k2, sys, text, tgt):
 
     print("**### API used!")
     translated_text = response.choices[0].message.content
-    last_history = history_context
 
     # Update History (maintain max 6 items)
     history_context.append({"role": "user", "content": text})
@@ -252,8 +251,7 @@ current_recorder: WebSocket | None = None
 PING_TIMEOUT = 40  # seconds
 
 async def lifespan(app: FastAPI):
-    global configs, clients, histories, translation_cache, last_history
-    last_history = None
+    global configs, clients, histories, translation_cache
     translation_cache = {}
     configs = build_configs()
     clients, histories = build_clients()
