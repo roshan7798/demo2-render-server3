@@ -17,6 +17,10 @@ sys.stdout.reconfigure(line_buffering=True)
 global last_history
 last_history = {}
 
+last_history["EN"] = []
+last_history["AR"] = []
+last_history["FA"] = []
+
 def build_configs():
     edge_compatible_voices = {
     "EN_F": "en-US-JennyNeural",
@@ -83,7 +87,7 @@ def build_clients():
     history["EN"] = []
     history["AR"] = []
     history["FA"] = []
-
+    
     return clients, history
 
 def make_cache_key(text, lang, recent_history):
