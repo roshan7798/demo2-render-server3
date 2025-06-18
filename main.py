@@ -14,7 +14,8 @@ import uvicorn
 import sys
 
 sys.stdout.reconfigure(line_buffering=True)
-
+global last_history
+last_history = {}
 
 def build_configs():
     edge_compatible_voices = {
@@ -71,10 +72,12 @@ def build_clients():
     clients = {}
     history = {}
     client = OpenAI(api_key=os.environ["DEEPSEEK_API_KEY"], base_url="https://api.deepseek.com")
+    client1 = OpenAI(api_key=os.environ["DEEPSEEK_API_KEY"], base_url="https://api.deepseek.com")
+    client2 = OpenAI(api_key=os.environ["DEEPSEEK_API_KEY"], base_url="https://api.deepseek.com")
 
     clients["EN"] = client
-    clients["AR"] = client
-    clients["FA"] = client
+    clients["AR"] = client1
+    clients["FA"] = client2
 
     # Based on TARGET language
     history["EN"] = []
@@ -99,23 +102,38 @@ async def generate_text_for_lang(k2, sys, text, tgt):
     if k2 not in clients.keys():
         raise ValueError(f"No API key configured for language: {k2}")
 
-    # Switch the API key for this call
     client = clients[k2]
     history_context = histories[k2]
 
-    # Take last N history messages (optional)
-    recent_history = history_context[-5:] if history_context else []
+    #print("***LANG: ", k2, flush=True)
+    #print("***Current History Context:", history_context, flush=True)
 
-    # Build cache key
-    cache_key = make_cache_key(text, tgt, recent_history)
 
+    if last_history[k2]:
+        cache_key2 = make_cache_key(text, tgt, last_history[k2])
+        # Check cache
+        cached2 = get_cached_translation(cache_key2)
+        if cached2:
+            #print("**### Cache used!", flush=True)
+            return cached2
+    
+    cache_key = make_cache_key(text, tgt, history_context)
+    #print("### Cache Key:", cache_key, flush=True)
     # Check cache
     cached = get_cached_translation(cache_key)
     if cached:
+        #print("**### Cache used!", flush=True)
         return cached
 
-    # Build prompt
-    prompt = [{"role": "system", "content": sys}] + recent_history + [{"role": "user", "content": text}]
+    # Build prompt: start with system message, then conversation history
+    prompt = [{"role": "system", "content": sys}]
+    
+    # Add user-assistant pairs from history (skip system message if already included)
+    prompt += history_context
+
+    # Add current user message
+    prompt.append({"role": "user", "content": text})
+    #print("### Prompt sent to model:", prompt, flush=True)
 
     response = client.chat.completions.create(
         model="deepseek-chat",
@@ -123,14 +141,24 @@ async def generate_text_for_lang(k2, sys, text, tgt):
         stream=False
     )
 
+    #print("**### API used!", flush=True)
     translated_text = response.choices[0].message.content
 
-    # Update History (maintain max 6 items)
+    # Append the new interaction as a pair (user + assistant) to the history
     history_context.append({"role": "user", "content": text})
     history_context.append({"role": "assistant", "content": translated_text})
-    if len(history_context) > 5:
-        history_context[:] = history_context[-5:]
 
+    # Keep last N messages (must be even number to preserve user/assistant pairs)
+    max_history_messages = 6  # i.e., 3 pairs
+    if len(history_context) > max_history_messages:
+        # Keep only the most recent N messages (preserving pairs)
+        history_context[:] = history_context[-max_history_messages:]
+
+    #print("***NEW history: ", history_context, flush=True)
+    
+    # Update global last_history
+    last_history[k2] = history_context.copy()
+    
     # Store in Cache
     add_translation_to_cache(cache_key, translated_text)
 
