@@ -119,12 +119,12 @@ async def generate_text_for_lang(k2, sys, text, tgt):
         return cached
 
     # Build prompt
-    prompt = {"messages": [{"role": "system", "content": sys}] + recent_history + [{"role": "user", "content": text}]}
+    prompt = [{"role": "system", "content": sys}] + recent_history + [{"role": "user", "content": text}]
     print("### prompt:", prompt, flush=True)
 
     response = client.chat.completions.create(
         model="deepseek-chat",
-        input=prompt,
+        messages=prompt,
         stream=False
     )
 
