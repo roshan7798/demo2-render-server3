@@ -14,12 +14,6 @@ import uvicorn
 import sys
 
 sys.stdout.reconfigure(line_buffering=True)
-global last_history
-last_history = {}
-
-last_history["EN"] = []
-last_history["AR"] = []
-last_history["FA"] = []
 
 def build_configs():
     edge_compatible_voices = {
@@ -34,39 +28,75 @@ def build_configs():
     configs = {}
 
     configs["EN_F"] = {
-          "system_instruction":"You are a translator. When I send you text, translate it to English and ONLY respond with the English translation. Do not have a conversation, do not ask questions, do not explain, do not hold a conversation.",
-          "target_language": "English",
-          "voice_name": edge_compatible_voices["EN_F"]
+        "system_instruction":(
+                "You are a translator bot. Your ONLY job is to translate text from any language into English. "
+                "You MUST NOT answer questions, explain things, or engage in conversation. "
+                "If the input is not in English, return the English translation ONLY. "
+                "If the input IS already in English, return it as-is. "
+                "Do not add anything else, ever."
+            ),
+        "target_language": "English",
+        "voice_name": edge_compatible_voices["EN_F"]
     }
 
     configs["EN_M"] = {
-          "system_instruction":"You are a translator. When I send you text, translate it to English and ONLY respond with the English translation. Do not have a conversation, do not ask questions, do not explain, do not hold a conversation.",
-          "target_language": "English",
-          "voice_name": edge_compatible_voices["EN_M"]
+        "system_instruction":(
+                "You are a translator bot. Your ONLY job is to translate text from any language into English. "
+                "You MUST NOT answer questions, explain things, or engage in conversation. "
+                "If the input is not in English, return the English translation ONLY. "
+                "If the input IS already in English, return it as-is. "
+                "Do not add anything else, ever."
+            ),
+        "target_language": "English",
+        "voice_name": edge_compatible_voices["EN_M"]
     }
 
     configs["FA_F"] = {
-          "system_instruction":"You are a translator. When I send you text, translate it to Persian and ONLY respond with the Persian translation. Do not have a conversation, do not ask questions, do not explain, do not hold a conversation.",
-          "target_language": "Persian",
-          "voice_name": edge_compatible_voices["FA_F"]
+        "system_instruction":(
+                "You are a translator bot. Your ONLY job is to translate text from any language into Persian. "
+                "You MUST NOT answer questions, explain things, or engage in conversation. "
+                "If the input is not in Persian, return the Persian translation ONLY. "
+                "If the input IS already in Persian, return it as-is. "
+                "Do not add anything else, ever."
+            ),
+        "target_language": "Persian",
+        "voice_name": edge_compatible_voices["FA_F"]
     }
 
     configs["FA_M"] = {
-          "system_instruction":"You are a translator. When I send you text, translate it to Persian and ONLY respond with the Persian translation. Do not have a conversation, do not ask questions, do not explain, do not hold a conversation.",
-          "target_language": "Persian",
-          "voice_name": edge_compatible_voices["FA_M"]
+        "system_instruction":(
+                "You are a translator bot. Your ONLY job is to translate text from any language into Persian. "
+                "You MUST NOT answer questions, explain things, or engage in conversation. "
+                "If the input is not in Persian, return the Persian translation ONLY. "
+                "If the input IS already in Persian, return it as-is. "
+                "Do not add anything else, ever."
+            ),
+        "target_language": "Persian",
+        "voice_name": edge_compatible_voices["FA_M"]
     }
 
     configs["AR_F"] = {
-          "system_instruction":"You are a translator. When I send you text, translate it to Arabic and ONLY respond with the Arabic translation. Do not have a conversation, do not ask questions, do not explain, do not hold a conversation.",
-          "target_language": "Arabic",
-          "voice_name": edge_compatible_voices["AR_F"]
+        "system_instruction":(
+                "You are a translator bot. Your ONLY job is to translate text from any language into Arabic. "
+                "You MUST NOT answer questions, explain things, or engage in conversation. "
+                "If the input is not in Arabic, return the Arabic translation ONLY. "
+                "If the input IS already in Arabic, return it as-is. "
+                "Do not add anything else, ever."
+            ),
+        "target_language": "Arabic",
+        "voice_name": edge_compatible_voices["AR_F"]
     }
 
     configs["AR_M"] = {
-          "system_instruction":"You are a translator. When I send you text, translate it to Arabic and ONLY respond with the Arabic translation. Do not have a conversation, do not ask questions, do not explain, do not hold a conversation.",
-          "target_language": "Arabic",
-          "voice_name": edge_compatible_voices["AR_M"]
+        "system_instruction":(
+                "You are a translator bot. Your ONLY job is to translate text from any language into Arabic. "
+                "You MUST NOT answer questions, explain things, or engage in conversation. "
+                "If the input is not in Arabic, return the Arabic translation ONLY. "
+                "If the input IS already in Arabic, return it as-is. "
+                "Do not add anything else, ever."
+            ),
+        "target_language": "Arabic",
+        "voice_name": edge_compatible_voices["AR_M"]
     }
 
     return configs
@@ -90,44 +120,12 @@ def build_clients():
     
     return clients, history
 
-def make_cache_key(text, lang, recent_history):
-    # Use ONLY previous history, don't include current user input yet
-    context_str = "||".join([m["content"] for m in recent_history])
-    hash_val = hashlib.md5(context_str.encode()).hexdigest()
-    return f"{lang}||{text.strip()}||{hash_val}"
-
-def get_cached_translation(cache_key):
-    return translation_cache.get(cache_key)
-
-def add_translation_to_cache(cache_key, value):
-    translation_cache[cache_key] = value
-
 async def generate_text_for_lang(k2, sys, text, tgt):
     if k2 not in clients.keys():
         raise ValueError(f"No API key configured for language: {k2}")
 
     client = clients[k2]
     history_context = histories[k2]
-
-    #print("***LANG: ", k2, flush=True)
-    #print("***Current History Context:", history_context, flush=True)
-
-
-    if last_history[k2]:
-        cache_key2 = make_cache_key(text, tgt, last_history[k2])
-        # Check cache
-        cached2 = get_cached_translation(cache_key2)
-        if cached2:
-            #print("**### Cache used!", flush=True)
-            return cached2
-    
-    cache_key = make_cache_key(text, tgt, history_context)
-    #print("### Cache Key:", cache_key, flush=True)
-    # Check cache
-    cached = get_cached_translation(cache_key)
-    if cached:
-        #print("**### Cache used!", flush=True)
-        return cached
 
     # Build prompt: start with system message, then conversation history
     prompt = [{"role": "system", "content": sys}]
@@ -136,8 +134,7 @@ async def generate_text_for_lang(k2, sys, text, tgt):
     prompt += history_context
 
     # Add current user message
-    prompt.append({"role": "user", "content": text})
-    #print("### Prompt sent to model:", prompt, flush=True)
+    prompt.append({"role": "user", "content": "Translate:" + text})
 
     response = client.chat.completions.create(
         model="deepseek-chat",
@@ -145,7 +142,6 @@ async def generate_text_for_lang(k2, sys, text, tgt):
         stream=False
     )
 
-    #print("**### API used!", flush=True)
     translated_text = response.choices[0].message.content
 
     # Append the new interaction as a pair (user + assistant) to the history
@@ -157,15 +153,7 @@ async def generate_text_for_lang(k2, sys, text, tgt):
     if len(history_context) > max_history_messages:
         # Keep only the most recent N messages (preserving pairs)
         history_context[:] = history_context[-max_history_messages:]
-
-    #print("***NEW history: ", history_context, flush=True)
     
-    # Update global last_history
-    last_history[k2] = history_context.copy()
-    
-    # Store in Cache
-    add_translation_to_cache(cache_key, translated_text)
-
     return translated_text
 
 async def gpt_translate(k2, config, text_input):
@@ -270,8 +258,7 @@ current_recorder: WebSocket | None = None
 PING_TIMEOUT = 40  # seconds
 
 async def lifespan(app: FastAPI):
-    global configs, clients, histories, translation_cache
-    translation_cache = {}
+    global configs, clients, histories
     configs = build_configs()
     clients, histories = build_clients()
 
