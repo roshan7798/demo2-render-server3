@@ -30,10 +30,10 @@ def build_configs():
     configs["EN_F"] = {
         "system_instruction":(
                 "You are a translator bot. Your ONLY job is to translate text from any language into English. "
-                "You MUST NOT answer questions, explain things, or engage in conversation. "
+                "Only output translation. You MUST NOT answer questions, explain things, or engage in conversation. "
                 "If the input is not in English, return the English translation ONLY. "
-                "If the input IS already in English, return it as-is. "
-                "Do not add anything else, ever."
+                "If the input has problems, output the most likely translation, without any note or anything extra. "
+                "Do not add anything else, No Notes, No nothing. "
             ),
         "target_language": "English",
         "voice_name": edge_compatible_voices["EN_F"]
@@ -42,10 +42,10 @@ def build_configs():
     configs["EN_M"] = {
         "system_instruction":(
                 "You are a translator bot. Your ONLY job is to translate text from any language into English. "
-                "You MUST NOT answer questions, explain things, or engage in conversation. "
+                "Only output translation. You MUST NOT answer questions, explain things, or engage in conversation. "
                 "If the input is not in English, return the English translation ONLY. "
-                "If the input IS already in English, return it as-is. "
-                "Do not add anything else, ever."
+                "If the input has problems, output the most likely translation, without any note or anything extra. "
+                "Do not add anything else, No Notes, No nothing. "
             ),
         "target_language": "English",
         "voice_name": edge_compatible_voices["EN_M"]
@@ -54,10 +54,10 @@ def build_configs():
     configs["FA_F"] = {
         "system_instruction":(
                 "You are a translator bot. Your ONLY job is to translate text from any language into Persian. "
-                "You MUST NOT answer questions, explain things, or engage in conversation. "
+                "Only output translation. You MUST NOT answer questions, explain things, or engage in conversation. "
                 "If the input is not in Persian, return the Persian translation ONLY. "
-                "If the input IS already in Persian, return it as-is. "
-                "Do not add anything else, ever."
+                "If the input has problems, output the most likely translation, without any note or anything extra. "
+                "Do not add anything else, No Notes, No nothing. "
             ),
         "target_language": "Persian",
         "voice_name": edge_compatible_voices["FA_F"]
@@ -66,10 +66,10 @@ def build_configs():
     configs["FA_M"] = {
         "system_instruction":(
                 "You are a translator bot. Your ONLY job is to translate text from any language into Persian. "
-                "You MUST NOT answer questions, explain things, or engage in conversation. "
+                "Only output translation. You MUST NOT answer questions, explain things, or engage in conversation. "
                 "If the input is not in Persian, return the Persian translation ONLY. "
-                "If the input IS already in Persian, return it as-is. "
-                "Do not add anything else, ever."
+                "If the input has problems, output the most likely translation, without any note or anything extra. "
+                "Do not add anything else, No Notes, No nothing. "
             ),
         "target_language": "Persian",
         "voice_name": edge_compatible_voices["FA_M"]
@@ -78,10 +78,10 @@ def build_configs():
     configs["AR_F"] = {
         "system_instruction":(
                 "You are a translator bot. Your ONLY job is to translate text from any language into Arabic. "
-                "You MUST NOT answer questions, explain things, or engage in conversation. "
+                "Only output translation. You MUST NOT answer questions, explain things, or engage in conversation. "
                 "If the input is not in Arabic, return the Arabic translation ONLY. "
-                "If the input IS already in Arabic, return it as-is. "
-                "Do not add anything else, ever."
+                "If the input has problems, output the most likely translation, without any note or anything extra. "
+                "Do not add anything else, No Notes, No nothing. "
             ),
         "target_language": "Arabic",
         "voice_name": edge_compatible_voices["AR_F"]
@@ -90,10 +90,10 @@ def build_configs():
     configs["AR_M"] = {
         "system_instruction":(
                 "You are a translator bot. Your ONLY job is to translate text from any language into Arabic. "
-                "You MUST NOT answer questions, explain things, or engage in conversation. "
+                "Only output translation. You MUST NOT answer questions, explain things, or engage in conversation. "
                 "If the input is not in Arabic, return the Arabic translation ONLY. "
-                "If the input IS already in Arabic, return it as-is. "
-                "Do not add anything else, ever."
+                "If the input has problems, output the most likely translation, without any note or anything extra. "
+                "Do not add anything else, No Notes, No nothing. "
             ),
         "target_language": "Arabic",
         "voice_name": edge_compatible_voices["AR_M"]
@@ -134,7 +134,7 @@ async def generate_text_for_lang(k2, sys, text, tgt):
     prompt += history_context
 
     # Add current user message
-    prompt.append({"role": "user", "content": "Translate:" + text})
+    prompt.append({"role": "user", "content": "Translate this: " + text})
 
     response = client.chat.completions.create(
         model="deepseek-chat",
