@@ -126,7 +126,6 @@ async def generate_text_for_lang(k2, sys, text, tgt):
 
     client = clients[k2]
     history_context = histories[k2]
-
     # Build prompt: start with system message, then conversation history
     prompt = [{"role": "system", "content": sys}]
     
@@ -161,7 +160,6 @@ async def gpt_translate(k2, config, text_input):
     target_sample_rate = 16000
 
     try:
-
         if isinstance(config, dict):
             system_instruction = config.get("system_instruction", "Translate this text.")
             target_language = config.get("target_language", "English")
@@ -287,7 +285,10 @@ rooms: Dict[str, Dict[WebSocket, Dict]] = {
 async def translate(src_lang, tgt_lang, text, speaker_id):
     speaker_id = int(speaker_id)
     try:
+        print("***Text - ",src_lang,": " ,text, flush=True)
         audio, sample_rate, translated_text = await t2S_translate(text, tgt_lang, speaker_id)
+        print("***Translate - ",tgt_lang,": ",translated_text, flush=True)
+
         if len(audio) == 0:
             print("WARNING: Empty audio received!", flush=True)
             return translated_text, ""
