@@ -255,7 +255,7 @@ from starlette.websockets import WebSocketState
 #from file import t2S_translate
 current_recorder: WebSocket | None = None
 
-PING_TIMEOUT = 40  # seconds
+PING_TIMEOUT = 5  # seconds
 
 async def lifespan(app: FastAPI):
     global configs, clients, histories
@@ -441,7 +441,14 @@ async def websocket_endpoint(websocket: WebSocket):
                 break
 
             if time.time() - last_active > PING_TIMEOUT:
-                print("Client inactive, disconnecting.", flush=True)
+                print(f"Client inactive for {PING_TIMEOUT} seconds, disconnecting.", flush=True)
+
+                # اگر این کاربر رکوردر بود، آزادش کن
+                if current_recorder == websocket:
+                    await per_record(list(rooms[DEFAULT_ROOM].keys()), True)
+                    current_recorder = None
+                    print("Recorder auto-released due to timeout.", flush=True)
+
                 break
 
     except Exception as e:
