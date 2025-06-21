@@ -255,7 +255,7 @@ from starlette.websockets import WebSocketState
 #from file import t2S_translate
 current_recorder: WebSocket | None = None
 
-PING_TIMEOUT = 5  # seconds
+PING_TIMEOUT = 10  # seconds
 
 async def lifespan(app: FastAPI):
     global configs, clients, histories
