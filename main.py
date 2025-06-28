@@ -393,7 +393,7 @@ async def per_record(connections, per: bool):
                 "per_record": per,
             })
             if a == 0: 
-                logger,info(f"per_record: {per}")
+                logger.info(f"per_record: {per}")
                 a = 1
         except Exception as e:
             logger.exception(f"Error: {e}")
