@@ -13,8 +13,34 @@ import os
 import uvicorn
 import sys
 import re
+import logging
 
 sys.stdout.reconfigure(line_buffering=True)
+
+log_file = "app.log"
+
+if not os.path.exists(log_file):
+    open(log_file, "w").close()  
+
+logger = logging.getLogger("my_logger")
+logger.setLevel(logging.DEBUG)  
+
+file_handler = logging.FileHandler("app.log")
+file_handler.setLevel(logging.DEBUG)
+file_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+file_handler.setFormatter(file_formatter)
+
+file_only_logger = logging.getLogger("file_only")
+file_only_logger.setLevel(logging.DEBUG)
+file_only_logger.addHandler(file_handler)
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+console_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+console_handler.setFormatter(console_formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
 
 def build_configs():
     edge_compatible_voices = {
@@ -143,33 +169,26 @@ async def generate_text_for_lang(k2, sys, text, tgt):
 
     client = clients[k2]
     history_context = histories[k2]
-    # Build prompt: start with system message, then conversation history
+
     prompt = [{"role": "developer", "content": sys}]
-
-    # Add user-assistant pairs from history (skip system message if already included)
     prompt += history_context
-
-    # Add current user message
     prompt.append({"role": "user", "content": "[tr]" + text + "[\tr]"})
 
     response = client.responses.create(
         model="gpt-4o-mini",
         input=prompt
     )
-    print("***Prompt: ",prompt, flush=True)
+    file_only_logger.info("***Prompt: %s", prompt)
 
     translated_text = clean_model_output(response.output_text)
 
-    print("***Translate: ",translated_text, flush=True)
+    file_only_logger.info("***Translate: %s", translated_text)
 
-    # Append the new interaction as a pair (user + assistant) to the history
-    history_context.append({"role": "user", "content": text})
+    history_context.append({"role": "user", "content": "[tr]" + text + "[\tr]"})
     history_context.append({"role": "assistant", "content": translated_text})
 
-    # Keep last N messages (must be even number to preserve user/assistant pairs)
-    max_history_messages = 6  # i.e., 3 pairs
+    max_history_messages = 6  # 3 pairs
     if len(history_context) > max_history_messages:
-        # Keep only the most recent N messages (preserving pairs)
         history_context[:] = history_context[-max_history_messages:]
 
     return translated_text
@@ -184,16 +203,16 @@ async def gpt_translate(k2, config, text_input):
             target_language = config.get("target_language", "English")
             system_instruction = config.get("system_instruction", "Translate the text in [tr] tag to {target_language}")
         else:
-            print("error: wrong config", flush=True)
+            logger.info("Error: Wrong config!")
             
-        print("system_instruction", system_instruction, flush=True)
-        print("target_language", target_language, flush=True)
+        logger.info("***Target language: %s", target_language)
+
         transcript_text = await generate_text_for_lang(k2, system_instruction, text_input, target_language)
 
         return transcript_text
 
     except Exception as e:
-        print(f"Error in gpt_translate: {e}", flush=True)
+        logger.exception(f"Error in gpt_translate: {e}")
         raise
 
 async def tts (text, config):
@@ -202,7 +221,7 @@ async def tts (text, config):
             target_language = config.get("target_language", "English")
             voice_name = config.get("voice_name", "en-US-JennyNeural")
         else:
-            print("error: wrong config", flush=True)
+            logger.info("Error: Wrong config!")
         target_sample_rate = 16000
         communicate = edge_tts.Communicate(text=text, voice=voice_name)
         mp3_chunks = []
@@ -238,7 +257,7 @@ async def tts (text, config):
         return audio_samples, sample_rate
 
     except Exception as e:
-        print(f"[edge_tts_to_float_audio] Error: {e}", flush=True)
+        logger.exception(f"[edge_tts_to_float_audio] Error: {e}")
         raise
 
 def get_client_key(tgt_lang, speaker_id):
@@ -282,20 +301,20 @@ async def lifespan(app: FastAPI):
     configs = build_configs()
     clients, histories = build_clients()
 
-    print("Starting up ...", flush=True)
+    logger.info("Starting up ...")
     yield
-    print("Shutting down. Closing all WebSocket connections...", flush=True)
+    logger.info("Shutting down. Closing all WebSocket connections...")
     websockets = list(rooms[DEFAULT_ROOM].keys())
 
     for ws in websockets:
         try:
             await ws.close(code=1001)  # 1001 = Going Away
         except Exception as e:
-            print(f"WebSocket Disconnected! {e} ", flush=True)
+            logger.exception(f"WebSocket Disconnected! {e} ")
         finally:
             rooms[DEFAULT_ROOM].pop(ws, None)
 
-    print("Shutdown complete.", flush=True)
+    logger.info("Shutdown complete.")
 
 app = FastAPI(lifespan=lifespan)
 
@@ -307,15 +326,12 @@ rooms: Dict[str, Dict[WebSocket, Dict]] = {
 async def translate(src_lang, tgt_lang, text, speaker_id):
     speaker_id = int(speaker_id)
     try:
-        #print("***Text - ",src_lang,": " ,text, flush=True)
+        logger.info("Source language: %s", src_lang)
         audio, sample_rate, translated_text = await t2S_translate(text, tgt_lang, speaker_id)
-        #print("***Translate - ",tgt_lang,": ",translated_text, flush=True)
 
         if len(audio) == 0:
-            print("WARNING: Empty audio received!", flush=True)
+            logger.info("WARNING: Empty audio received!")
             return translated_text, ""
-
-        #print(f"Final audio for WAV - shape: {audio.shape}, min/max: {audio.min()}/{audio.max()}", flush=True)
 
         # Convert float32 normalized audio (-1.0 to 1.0) back to int16 PCM
         int16_audio = (audio * 32767).astype(np.int16)
@@ -333,11 +349,10 @@ async def translate(src_lang, tgt_lang, text, speaker_id):
         buffer.seek(0)
         audio_b64 = base64.b64encode(buffer.read()).decode('utf-8')
 
-        #print(f"Base64 audio length: {len(audio_b64)} chars", flush=True)
         return translated_text, audio_b64
 
     except Exception as e:
-        print(f"Error in translate function: {e}", flush=True)
+        logger.exception(f"Error in translate function: {e}", flush=True)
         return f"Translation error: {str(e)}", ""
 
 
@@ -354,9 +369,9 @@ async def group_translate(connections, src_lang: str, tgt_lang: str, text: str, 
               "src_lang": src_lang,
               "tgt_lang": tgt_lang,
             })
-            print(f"WebSocket x recieved src_lang: {src_lang}, tgt_lang: {tgt_lang}", flush=True)
+            logger.info(f"WebSocket recieved src_lang: {src_lang}, tgt_lang: {tgt_lang}")
         except Exception as e:
-          print(f"Error translating for group {tgt_lang}/{speaker_id}: {e}", flush=True)
+          logger.exception(f"Error translating for group {tgt_lang}/{speaker_id}: {e}")
 
 async def just_send(ws: WebSocket, src_lang: str, text: str):
 
@@ -366,20 +381,22 @@ async def just_send(ws: WebSocket, src_lang: str, text: str):
             "transcript": text,
             "src_lang": src_lang
         })
-        print(f"WebSocket x recieved src_lang: {src_lang}", flush=True)
     except Exception as e:
-        print(f"Error: {e}", flush=True)
+        logger.exception(f"Error: {e}", flush=True)
 
 async def per_record(connections, per: bool):
+    a = 0
     for ws in connections:
         try:
             await ws.send_json({
                 "type" : "per_record",
                 "per_record": per,
             })
-            print(f"per_record: {per}", flush=True)
+            if a == 0: 
+                logger,info(f"per_record: {per}")
+                a = 1
         except Exception as e:
-            print(f"Error: {e}", flush=True)
+            logger.exception(f"Error: {e}")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -418,7 +435,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     rooms[DEFAULT_ROOM][websocket]["lang"] = lang
                     rooms[DEFAULT_ROOM][websocket]["speaker_id"] = speaker_id
                     await websocket.send_json({"status": "settings_updated"})
-                    print(f"WebSocket {websocket} updated settings: lang={lang}, speaker_id={speaker_id}", flush=True)
+                    logger.info(f"WebSocket {websocket} updated settings: lang={lang}, speaker_id={speaker_id}", flush=True)
 
                 elif data.get("type") == "ping":
                     await websocket.send_json({"type": "pong"})
@@ -428,7 +445,6 @@ async def websocket_endpoint(websocket: WebSocket):
                     src_lang = data.get("src_lang")
                     text = data.get("text")
                     speaker_id = int(data.get("speaker_id", "0"))
-                    print(f"ws x , src_lang: {src_lang} *type speak", flush=True)
                     if not src_lang or not text:
                         continue
 
@@ -460,47 +476,34 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
             except Exception as e:
-                print(f"Client error: {e}", flush=True)
+                logger.exception(f"Client error: {e}")
                 break
 
             if time.time() - last_active > PING_TIMEOUT:
-                print(f"Client inactive for {PING_TIMEOUT} seconds, disconnecting.", flush=True)
+                logger.info(f"Client inactive for {PING_TIMEOUT} seconds, disconnecting.")
 
-                # اگر این کاربر رکوردر بود، آزادش کن
                 if current_recorder == websocket:
                     await per_record(list(rooms[DEFAULT_ROOM].keys()), True)
                     current_recorder = None
-                    print("Recorder auto-released due to timeout.", flush=True)
+                    logger.info("Recorder auto-released due to timeout.")
 
                 break
 
     except Exception as e:
-        print(f"Connection error: {e}", flush=True)
+        logger.exception(f"Connection error: {e}", flush=True)
 
     finally:
         rooms[DEFAULT_ROOM].pop(websocket, None)
 
-        # همیشه بررسی کنیم که اگر این کاربر رکوردر بود، آن را خالی کنیم
         if current_recorder == websocket:
             await per_record(list(rooms[DEFAULT_ROOM].keys()), True)
             current_recorder = None
 
-        # تلاش برای بستن سوکت
         try:
             await websocket.close()
         except Exception as e:
-            print(f"Error closing WebSocket: {e}", flush=True)
+            logger.exception(f"Error closing WebSocket: {e}", flush=True)
 
-    # finally:
-    #     rooms[DEFAULT_ROOM].pop(websocket, None)
-    #     if websocket.client_state != WebSocketState.DISCONNECTED:
-    #         if current_recorder == websocket:
-    #             await per_record(list(rooms[DEFAULT_ROOM].keys()), True)
-    #             current_recorder = None
-    #         try:
-    #             await websocket.close()
-    #         except Exception as e:
-    #             print(f"Error closing WebSocket: {e}")
 
 # Run the FastAPI app using uvicorn
 if __name__ == "__main__":
