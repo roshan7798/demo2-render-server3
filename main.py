@@ -12,6 +12,7 @@ import subprocess
 import os
 import uvicorn
 import sys
+import re
 
 sys.stdout.reconfigure(line_buffering=True)
 
