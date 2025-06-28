@@ -17,10 +17,10 @@ import logging
 
 sys.stdout.reconfigure(line_buffering=True)
 
-log_file = "app.log"
+log_file = "./app.log"
 
 if not os.path.exists(log_file):
-    open(log_file, "w").close()  
+    open(log_file, "a").close()  
 
 logger = logging.getLogger("my_logger")
 logger.setLevel(logging.DEBUG)  
@@ -57,12 +57,10 @@ def build_configs():
     configs["EN_F"] = {
         "system_instruction":(
                 "You are a natural translation bot. ONLY TRANSLATE the text found between [tr] and [/tr] tags from any language into English."
-                "- Do not reply with anything else."
-                "- Do not explain or add context or notes."
-                "- Only output the natural translation without the tags."
-                "- If the input contains no [tr] tags, return nothing."
-                "- If the input has any problems, output the most likely translation."
-                "- if the input is English, just output the same text."
+                "Do not reply with anything else. Only output the natural translation without any tags or extra text."
+                "Do not explain or add context or notes."
+                "If the input contains no [tr] tags, return nothing."
+                "If the input has any problems, output the most likely translation."
             ),
         "target_language": "English",
         "voice_name": edge_compatible_voices["EN_F"]
@@ -71,12 +69,10 @@ def build_configs():
     configs["EN_M"] = {
         "system_instruction":(
                 "You are a natural translation bot. ONLY TRANSLATE the text found between [tr] and [/tr] tags from any language into English."
-                "- Do not reply with anything else."
-                "- Do not explain or add context or notes."
-                "- Only output the natural translation without the tags."
-                "- If the input contains no [tr] tags, return nothing."
-                "- If the input has any problems, output the most likely translation."
-                "- if the input is English, just output the same text."
+                "Do not reply with anything else. Only output the natural translation without any tags or extra text."
+                "Do not explain or add context or notes."
+                "If the input contains no [tr] tags, return nothing."
+                "If the input has any problems, output the most likely translation."
             ),
         "target_language": "English",
         "voice_name": edge_compatible_voices["EN_M"]
@@ -85,12 +81,10 @@ def build_configs():
     configs["FA_F"] = {
         "system_instruction":(
                 "You are a natural translation bot. ONLY TRANSLATE the text found between [tr] and [/tr] tags from any language into Persian."
-                "- Do not reply with anything else."
-                "- Do not explain or add context or notes."
-                "- Only output the natural translation without the tags."
-                "- If the input contains no [tr] tags, return nothing."
-                "- If the input has any problems, output the most likely translation."
-                "- if the input is Persian, just output the same text."
+                "Do not reply with anything else. Only output the natural translation without any tags or extra text."
+                "Do not explain or add context or notes."
+                "If the input contains no [tr] tags, return nothing."
+                "If the input has any problems, output the most likely translation."
             ),
         "target_language": "Persian",
         "voice_name": edge_compatible_voices["FA_F"]
@@ -99,12 +93,10 @@ def build_configs():
     configs["FA_M"] = {
         "system_instruction":(
                 "You are a natural translation bot. ONLY TRANSLATE the text found between [tr] and [/tr] tags from any language into Persian."
-                "- Do not reply with anything else."
-                "- Do not explain or add context or notes."
-                "- Only output the natural translation without the tags."
-                "- If the input contains no [tr] tags, return nothing."
-                "- If the input has any problems, output the most likely translation."
-                "- if the input is Persian, just output the same text."
+                "Do not reply with anything else. Only output the natural translation without any tags or extra text."
+                "Do not explain or add context or notes."
+                "If the input contains no [tr] tags, return nothing."
+                "If the input has any problems, output the most likely translation."
             ),
         "target_language": "Persian",
         "voice_name": edge_compatible_voices["FA_M"]
@@ -113,12 +105,10 @@ def build_configs():
     configs["AR_F"] = {
         "system_instruction":(
                 "You are a natural translation bot. ONLY TRANSLATE the text found between [tr] and [/tr] tags from any language into Arabic."
-                "- Do not reply with anything else."
-                "- Do not explain or add context or notes."
-                "- Only output the natural translation without the tags."
-                "- If the input contains no [tr] tags, return nothing."
-                "- If the input has any problems, output the most likely translation."
-                "- if the input is Arabic, just output the same text."
+                "Do not reply with anything else. Only output the natural translation without any tags or extra text."
+                "Do not explain or add context or notes."
+                "If the input contains no [tr] tags, return nothing."
+                "If the input has any problems, output the most likely translation."
             ),
         "target_language": "Arabic",
         "voice_name": edge_compatible_voices["AR_F"]
@@ -127,12 +117,10 @@ def build_configs():
     configs["AR_M"] = {
         "system_instruction":(
                 "You are a natural translation bot. ONLY TRANSLATE the text found between [tr] and [/tr] tags from any language into Arabic."
-                "- Do not reply with anything else."
-                "- Do not explain or add context or notes."
-                "- Only output the natural translation without the tags."
-                "- If the input contains no [tr] tags, return nothing."
-                "- If the input has any problems, output the most likely translation."
-                "- if the input is Arabic, just output the same text."
+                "Do not reply with anything else. Only output the natural translation without any tags or extra text."
+                "Do not explain or add context or notes."
+                "If the input contains no [tr] tags, return nothing."
+                "If the input has any problems, output the most likely translation."
             ),
         "target_language": "Arabic",
         "voice_name": edge_compatible_voices["AR_M"]
