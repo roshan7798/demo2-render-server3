@@ -162,13 +162,13 @@ async def generate_text_for_lang(k2, sys, text, tgt):
     prompt += history_context
     prompt.append({"role": "user", "content": "[tr]" + text + "[\tr]"})
 
-    response = client.responses.create(
+    response = client.chat.completions.create(
         model="gpt-4o-mini",
-        input=prompt
+        messages=prompt
     )
     file_only_logger.info("***Prompt: %s", prompt)
 
-    translated_text = clean_model_output(response.output_text)
+    translated_text = clean_model_output(response.choices[0].message.content)
 
     file_only_logger.info("***Translate: %s", translated_text)
 
