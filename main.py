@@ -352,7 +352,7 @@ async def translate(src_lang, tgt_lang, text, speaker_id):
         return translated_text, audio_b64
 
     except Exception as e:
-        logger.exception(f"Error in translate function: {e}", flush=True)
+        logger.exception(f"Error in translate function: {e}")
         return f"Translation error: {str(e)}", ""
 
 
@@ -382,7 +382,7 @@ async def just_send(ws: WebSocket, src_lang: str, text: str):
             "src_lang": src_lang
         })
     except Exception as e:
-        logger.exception(f"Error: {e}", flush=True)
+        logger.exception(f"Error: {e}")
 
 async def per_record(connections, per: bool):
     a = 0
@@ -435,7 +435,7 @@ async def websocket_endpoint(websocket: WebSocket):
                     rooms[DEFAULT_ROOM][websocket]["lang"] = lang
                     rooms[DEFAULT_ROOM][websocket]["speaker_id"] = speaker_id
                     await websocket.send_json({"status": "settings_updated"})
-                    logger.info(f"WebSocket {websocket} updated settings: lang={lang}, speaker_id={speaker_id}", flush=True)
+                    logger.info(f"WebSocket {websocket} updated settings: lang={lang}, speaker_id={speaker_id}")
 
                 elif data.get("type") == "ping":
                     await websocket.send_json({"type": "pong"})
@@ -490,7 +490,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 break
 
     except Exception as e:
-        logger.exception(f"Connection error: {e}", flush=True)
+        logger.exception(f"Connection error: {e}")
 
     finally:
         rooms[DEFAULT_ROOM].pop(websocket, None)
@@ -502,7 +502,7 @@ async def websocket_endpoint(websocket: WebSocket):
         try:
             await websocket.close()
         except Exception as e:
-            logger.exception(f"Error closing WebSocket: {e}", flush=True)
+            logger.exception(f"Error closing WebSocket: {e}")
 
 
 # Run the FastAPI app using uvicorn
