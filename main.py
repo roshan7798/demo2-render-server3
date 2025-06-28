@@ -143,7 +143,6 @@ async def generate_text_for_lang(k2, sys, text, tgt):
 
     client = clients[k2]
     history_context = histories[k2]
-    print("***Text: ",text)#, flush=True)
     # Build prompt: start with system message, then conversation history
     prompt = [{"role": "developer", "content": sys}]
 
@@ -157,10 +156,11 @@ async def generate_text_for_lang(k2, sys, text, tgt):
         model="gpt-4o-mini",
         input=prompt
     )
+    print("***Prompt: ",prompt, flush=True)
 
     translated_text = clean_model_output(response.output_text)
 
-    print("***Translate: ",translated_text)#, flush=True)
+    print("***Translate: ",translated_text, flush=True)
 
     # Append the new interaction as a pair (user + assistant) to the history
     history_context.append({"role": "user", "content": text})
@@ -185,7 +185,9 @@ async def gpt_translate(k2, config, text_input):
             system_instruction = config.get("system_instruction", "Translate the text in [tr] tag to {target_language}")
         else:
             print("error: wrong config", flush=True)
-
+            
+        print("system_instruction", system_instruction, flush=True)
+        print("target_language", target_language, flush=True)
         transcript_text = await generate_text_for_lang(k2, system_instruction, text_input, target_language)
 
         return transcript_text
@@ -305,15 +307,15 @@ rooms: Dict[str, Dict[WebSocket, Dict]] = {
 async def translate(src_lang, tgt_lang, text, speaker_id):
     speaker_id = int(speaker_id)
     try:
-        print("***Text - ",src_lang,": " ,text, flush=True)
+        #print("***Text - ",src_lang,": " ,text, flush=True)
         audio, sample_rate, translated_text = await t2S_translate(text, tgt_lang, speaker_id)
-        print("***Translate - ",tgt_lang,": ",translated_text, flush=True)
+        #print("***Translate - ",tgt_lang,": ",translated_text, flush=True)
 
         if len(audio) == 0:
             print("WARNING: Empty audio received!", flush=True)
             return translated_text, ""
 
-        print(f"Final audio for WAV - shape: {audio.shape}, min/max: {audio.min()}/{audio.max()}", flush=True)
+        #print(f"Final audio for WAV - shape: {audio.shape}, min/max: {audio.min()}/{audio.max()}", flush=True)
 
         # Convert float32 normalized audio (-1.0 to 1.0) back to int16 PCM
         int16_audio = (audio * 32767).astype(np.int16)
@@ -331,7 +333,7 @@ async def translate(src_lang, tgt_lang, text, speaker_id):
         buffer.seek(0)
         audio_b64 = base64.b64encode(buffer.read()).decode('utf-8')
 
-        print(f"Base64 audio length: {len(audio_b64)} chars", flush=True)
+        #print(f"Base64 audio length: {len(audio_b64)} chars", flush=True)
         return translated_text, audio_b64
 
     except Exception as e:
