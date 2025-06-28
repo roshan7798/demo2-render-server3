@@ -29,11 +29,13 @@ def build_configs():
 
     configs["EN_F"] = {
         "system_instruction":(
-                "You are a translator bot. Your ONLY job is to translate text from any language into English. "
-                "Only output translation. You MUST NOT answer questions, explain things, or engage in conversation. "
-                "If the input is not in English, return the English translation ONLY. "
-                "If the input has problems, output the most likely translation, without any note or anything extra. "
-                "Do not add anything else, No Notes, No nothing. "
+                "You are a natural translation bot. ONLY TRANSLATE the text found between [tr] and [/tr] tags from any language into English."
+                "- Do not reply with anything else."
+                "- Do not explain or add context or notes."
+                "- Only output the natural translation without the tags."
+                "- If the input contains no [tr] tags, return nothing."
+                "- If the input has any problems, output the most likely translation."
+                "- if the input is English, just output the same text."
             ),
         "target_language": "English",
         "voice_name": edge_compatible_voices["EN_F"]
@@ -41,11 +43,13 @@ def build_configs():
 
     configs["EN_M"] = {
         "system_instruction":(
-                "You are a translator bot. Your ONLY job is to translate text from any language into English. "
-                "Only output translation. You MUST NOT answer questions, explain things, or engage in conversation. "
-                "If the input is not in English, return the English translation ONLY. "
-                "If the input has problems, output the most likely translation, without any note or anything extra. "
-                "Do not add anything else, No Notes, No nothing. "
+                "You are a natural translation bot. ONLY TRANSLATE the text found between [tr] and [/tr] tags from any language into English."
+                "- Do not reply with anything else."
+                "- Do not explain or add context or notes."
+                "- Only output the natural translation without the tags."
+                "- If the input contains no [tr] tags, return nothing."
+                "- If the input has any problems, output the most likely translation."
+                "- if the input is English, just output the same text."
             ),
         "target_language": "English",
         "voice_name": edge_compatible_voices["EN_M"]
@@ -53,11 +57,13 @@ def build_configs():
 
     configs["FA_F"] = {
         "system_instruction":(
-                "You are a translator bot. Your ONLY job is to translate text from any language into Persian. "
-                "Only output translation. You MUST NOT answer questions, explain things, or engage in conversation. "
-                "If the input is not in Persian, return the Persian translation ONLY. "
-                "If the input has problems, output the most likely translation, without any note or anything extra. "
-                "Do not add anything else, No Notes, No nothing. "
+                "You are a natural translation bot. ONLY TRANSLATE the text found between [tr] and [/tr] tags from any language into Persian."
+                "- Do not reply with anything else."
+                "- Do not explain or add context or notes."
+                "- Only output the natural translation without the tags."
+                "- If the input contains no [tr] tags, return nothing."
+                "- If the input has any problems, output the most likely translation."
+                "- if the input is Persian, just output the same text."
             ),
         "target_language": "Persian",
         "voice_name": edge_compatible_voices["FA_F"]
@@ -65,11 +71,13 @@ def build_configs():
 
     configs["FA_M"] = {
         "system_instruction":(
-                "You are a translator bot. Your ONLY job is to translate text from any language into Persian. "
-                "Only output translation. You MUST NOT answer questions, explain things, or engage in conversation. "
-                "If the input is not in Persian, return the Persian translation ONLY. "
-                "If the input has problems, output the most likely translation, without any note or anything extra. "
-                "Do not add anything else, No Notes, No nothing. "
+                "You are a natural translation bot. ONLY TRANSLATE the text found between [tr] and [/tr] tags from any language into Persian."
+                "- Do not reply with anything else."
+                "- Do not explain or add context or notes."
+                "- Only output the natural translation without the tags."
+                "- If the input contains no [tr] tags, return nothing."
+                "- If the input has any problems, output the most likely translation."
+                "- if the input is Persian, just output the same text."
             ),
         "target_language": "Persian",
         "voice_name": edge_compatible_voices["FA_M"]
@@ -77,11 +85,13 @@ def build_configs():
 
     configs["AR_F"] = {
         "system_instruction":(
-                "You are a translator bot. Your ONLY job is to translate text from any language into Arabic. "
-                "Only output translation. You MUST NOT answer questions, explain things, or engage in conversation. "
-                "If the input is not in Arabic, return the Arabic translation ONLY. "
-                "If the input has problems, output the most likely translation, without any note or anything extra. "
-                "Do not add anything else, No Notes, No nothing. "
+                "You are a natural translation bot. ONLY TRANSLATE the text found between [tr] and [/tr] tags from any language into Arabic."
+                "- Do not reply with anything else."
+                "- Do not explain or add context or notes."
+                "- Only output the natural translation without the tags."
+                "- If the input contains no [tr] tags, return nothing."
+                "- If the input has any problems, output the most likely translation."
+                "- if the input is Arabic, just output the same text."
             ),
         "target_language": "Arabic",
         "voice_name": edge_compatible_voices["AR_F"]
@@ -89,11 +99,13 @@ def build_configs():
 
     configs["AR_M"] = {
         "system_instruction":(
-                "You are a translator bot. Your ONLY job is to translate text from any language into Arabic. "
-                "Only output translation. You MUST NOT answer questions, explain things, or engage in conversation. "
-                "If the input is not in Arabic, return the Arabic translation ONLY. "
-                "If the input has problems, output the most likely translation, without any note or anything extra. "
-                "Do not add anything else, No Notes, No nothing. "
+                "You are a natural translation bot. ONLY TRANSLATE the text found between [tr] and [/tr] tags from any language into Arabic."
+                "- Do not reply with anything else."
+                "- Do not explain or add context or notes."
+                "- Only output the natural translation without the tags."
+                "- If the input contains no [tr] tags, return nothing."
+                "- If the input has any problems, output the most likely translation."
+                "- if the input is Arabic, just output the same text."
             ),
         "target_language": "Arabic",
         "voice_name": edge_compatible_voices["AR_M"]
@@ -105,9 +117,9 @@ def build_clients():
     # Clients
     clients = {}
     history = {}
-    client = OpenAI(api_key=os.environ["DEEPSEEK_API_KEY"], base_url="https://api.deepseek.com")
-    client1 = OpenAI(api_key=os.environ["DEEPSEEK_API_KEY"], base_url="https://api.deepseek.com")
-    client2 = OpenAI(api_key=os.environ["DEEPSEEK_API_KEY"], base_url="https://api.deepseek.com")
+    client = OpenAI(api_key=os.environ["Open_AI"])
+    client1 = OpenAI(api_key=os.environ["Open_AI"])
+    client2 = OpenAI(api_key=os.environ["Open_AI"])
 
     clients["EN"] = client
     clients["AR"] = client1
@@ -117,31 +129,37 @@ def build_clients():
     history["EN"] = []
     history["AR"] = []
     history["FA"] = []
-    
+
     return clients, history
 
+def clean_model_output(output: str) -> str:
+    return re.sub(r"\[/?tr\]", "", output.strip())
+
 async def generate_text_for_lang(k2, sys, text, tgt):
+    global clients, histories
     if k2 not in clients.keys():
         raise ValueError(f"No API key configured for language: {k2}")
 
     client = clients[k2]
     history_context = histories[k2]
+    print("***Text: ",text)#, flush=True)
     # Build prompt: start with system message, then conversation history
-    prompt = [{"role": "system", "content": sys}]
-    
+    prompt = [{"role": "developer", "content": sys}]
+
     # Add user-assistant pairs from history (skip system message if already included)
     prompt += history_context
 
     # Add current user message
-    prompt.append({"role": "user", "content": "Translate this: " + text})
+    prompt.append({"role": "user", "content": "[tr]" + text + "[\tr]"})
 
-    response = client.chat.completions.create(
-        model="deepseek-chat",
-        messages=prompt,
-        stream=False
+    response = client.responses.create(
+        model="gpt-4o-mini",
+        input=prompt
     )
 
-    translated_text = response.choices[0].message.content
+    translated_text = clean_model_output(response.output_text)
+
+    print("***Translate: ",translated_text)#, flush=True)
 
     # Append the new interaction as a pair (user + assistant) to the history
     history_context.append({"role": "user", "content": text})
@@ -152,7 +170,7 @@ async def generate_text_for_lang(k2, sys, text, tgt):
     if len(history_context) > max_history_messages:
         # Keep only the most recent N messages (preserving pairs)
         history_context[:] = history_context[-max_history_messages:]
-    
+
     return translated_text
 
 async def gpt_translate(k2, config, text_input):
@@ -161,8 +179,9 @@ async def gpt_translate(k2, config, text_input):
 
     try:
         if isinstance(config, dict):
-            system_instruction = config.get("system_instruction", "Translate this text.")
+            
             target_language = config.get("target_language", "English")
+            system_instruction = config.get("system_instruction", "Translate the text in [tr] tag to {target_language}")
         else:
             print("error: wrong config", flush=True)
 
