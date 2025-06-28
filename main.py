@@ -69,7 +69,6 @@ def build_configs():
                 "Do not explain or add context or notes."
                 "If the input contains no [tr] tags, return nothing."
                 "If the input has any problems, output the most likely translation."
-                "example: [{role}:{user}, {content}:{[tr]سلام وقت بخیر[\tr]},{role}:{assistant}, {content}:مرحبا وقتکم سعید]"
             ),
         "target_language": "English",
         "voice_name": edge_compatible_voices["EN_M"]
@@ -82,7 +81,6 @@ def build_configs():
                 "Do not explain or add context or notes."
                 "If the input contains no [tr] tags, return nothing."
                 "If the input has any problems, output the most likely translation."
-                "example: [{role}:{user}, {content}:{[tr]سلام وقت بخیر[\tr]},{role}:{assistant}, {content}:مرحبا وقتکم سعید]"
             ),
         "target_language": "Persian",
         "voice_name": edge_compatible_voices["FA_F"]
@@ -107,6 +105,8 @@ def build_configs():
                 "Do not explain or add context or notes."
                 "If the input contains no [tr] tags, return nothing."
                 "If the input has any problems, output the most likely translation."
+                "example: [{role}:{user}, {content}:{[tr]سلام وقت بخیر[\tr]},{role}:{assistant}, {content}:مرحبا وقتکم سعید]"
+
             ),
         "target_language": "Arabic",
         "voice_name": edge_compatible_voices["AR_F"]
@@ -119,6 +119,8 @@ def build_configs():
                 "Do not explain or add context or notes."
                 "If the input contains no [tr] tags, return nothing."
                 "If the input has any problems, output the most likely translation."
+                "example: [{role}:{user}, {content}:{[tr]سلام وقت بخیر[\tr]},{role}:{assistant}, {content}:مرحبا وقتکم سعید]"
+
             ),
         "target_language": "Arabic",
         "voice_name": edge_compatible_voices["AR_M"]
